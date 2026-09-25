@@ -1,0 +1,346 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>LexAI — Legal Document Assistant</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Lora:wght@500;600;700&display=swap"
+    rel="stylesheet"
+  />
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+
+  <!-- Shared icon sprite: every <use href="#icon-*"> below (and every one
+       injected dynamically by script.js) resolves against this single
+       source of truth — icons are defined once, never duplicated. -->
+  <svg aria-hidden="true" style="position:absolute;width:0;height:0;overflow:hidden" focusable="false">
+    <defs>
+      <symbol id="icon-scale" viewBox="0 0 24 24">
+        <g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="12" y1="4" x2="12" y2="19"/>
+          <line x1="5" y1="8" x2="19" y2="8"/>
+          <line x1="8" y1="21" x2="16" y2="21"/>
+          <circle cx="5" cy="12" r="3"/>
+          <circle cx="19" cy="12" r="3"/>
+        </g>
+      </symbol>
+      <symbol id="icon-search" viewBox="0 0 24 24">
+        <g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="7"/>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </g>
+      </symbol>
+      <symbol id="icon-edit" viewBox="0 0 24 24">
+        <g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 20h9"/>
+          <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z"/>
+        </g>
+      </symbol>
+      <symbol id="icon-clipboard" viewBox="0 0 24 24">
+        <g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="6" y="4" width="12" height="17" rx="2"/>
+          <path d="M9 4V3a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v1"/>
+          <line x1="9" y1="10" x2="15" y2="10"/>
+          <line x1="9" y1="14" x2="15" y2="14"/>
+          <line x1="9" y1="18" x2="13" y2="18"/>
+        </g>
+      </symbol>
+      <symbol id="icon-compare" viewBox="0 0 24 24">
+        <g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round">
+          <rect x="3" y="4" width="8" height="16" rx="1"/>
+          <rect x="13" y="4" width="8" height="16" rx="1"/>
+        </g>
+      </symbol>
+      <symbol id="icon-help" viewBox="0 0 24 24">
+        <g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="9"/>
+          <path d="M9.5 9a2.5 2.5 0 0 1 5 0c0 1.5-2.5 2-2.5 3.5"/>
+          <line x1="12" y1="17" x2="12.01" y2="17"/>
+        </g>
+      </symbol>
+      <symbol id="icon-briefcase" viewBox="0 0 24 24">
+        <g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="7" width="18" height="13" rx="2"/>
+          <path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+          <line x1="3" y1="13" x2="21" y2="13"/>
+        </g>
+      </symbol>
+      <symbol id="icon-alert" viewBox="0 0 24 24">
+        <g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 3 2 20h20L12 3Z"/>
+          <line x1="12" y1="9" x2="12" y2="14"/>
+          <line x1="12" y1="17.5" x2="12.01" y2="17.5"/>
+        </g>
+      </symbol>
+      <symbol id="icon-check" viewBox="0 0 24 24">
+        <g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="9"/>
+          <path d="M8 12.5l2.5 2.5L16 9.5"/>
+        </g>
+      </symbol>
+      <symbol id="icon-unlock" viewBox="0 0 24 24">
+        <g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="4" y="11" width="16" height="9" rx="2"/>
+          <path d="M8 11V7a4 4 0 0 1 7.5-2"/>
+        </g>
+      </symbol>
+      <symbol id="icon-calendar" viewBox="0 0 24 24">
+        <g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="5" width="18" height="16" rx="2"/>
+          <line x1="3" y1="10" x2="21" y2="10"/>
+          <line x1="8" y1="3" x2="8" y2="7"/>
+          <line x1="16" y1="3" x2="16" y2="7"/>
+        </g>
+      </symbol>
+      <symbol id="icon-file" viewBox="0 0 24 24">
+        <g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M6 3h9l5 5v13a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z"/>
+          <path d="M15 3v5h5"/>
+          <line x1="8" y1="13" x2="16" y2="13"/>
+          <line x1="8" y1="17" x2="16" y2="17"/>
+        </g>
+      </symbol>
+      <symbol id="icon-trash" viewBox="0 0 24 24">
+        <g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="4" y1="7" x2="20" y2="7"/>
+          <path d="M6 7l1 13a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-13"/>
+          <path d="M9 7V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v3"/>
+        </g>
+      </symbol>
+      <symbol id="icon-clock" viewBox="0 0 24 24">
+        <g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="9"/>
+          <polyline points="12 7 12 12 16 14"/>
+        </g>
+      </symbol>
+      <symbol id="icon-arrow-circle" viewBox="0 0 24 24">
+        <g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="9"/>
+          <polyline points="10 8 14 12 10 16"/>
+        </g>
+      </symbol>
+    </defs>
+  </svg>
+
+  <header class="app-header">
+    <div class="header-inner">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true"><svg class="icon"><use href="#icon-scale"/></svg></span>
+        <span class="brand-text">
+          <span class="brand-name">LexAI</span>
+          <span class="brand-tagline">Legal Document Assistant</span>
+        </span>
+      </div>
+      <p class="advice-banner" role="note">
+        <svg class="icon" aria-hidden="true"><use href="#icon-alert"/></svg>
+        Not legal advice — information &amp; assistance only
+      </p>
+    </div>
+  </header>
+
+  <main id="main-content" class="app-layout">
+    <section class="input-panel" aria-label="Document input">
+      <p class="eyebrow">Step 1</p>
+      <h1 class="panel-title">Your document</h1>
+
+      <label for="doc-label" class="field-label">Document name (optional)</label>
+      <input
+        id="doc-label"
+        type="text"
+        class="text-input"
+        maxlength="80"
+        placeholder="e.g. Freelance Services Agreement"
+        aria-label="Optional document name"
+      />
+
+      <label for="doc-text" class="field-label">Legal document text</label>
+      <textarea
+        id="doc-text"
+        class="doc-textarea"
+        aria-label="Legal document text"
+        aria-required="true"
+        placeholder="Paste your legal document here..."
+      ></textarea>
+      <div class="char-count" id="char-count" aria-live="polite">0 / 50,000 characters</div>
+
+      <div id="compare-panel" class="conditional-panel" hidden>
+        <label for="doc-text-b" class="field-label">Second document name (optional)</label>
+        <input
+          id="doc-label-b"
+          type="text"
+          class="text-input"
+          maxlength="80"
+          placeholder="e.g. Revised Draft"
+          aria-label="Optional second document name"
+        />
+        <label for="doc-text-b" class="field-label">Second document text</label>
+        <textarea
+          id="doc-text-b"
+          class="doc-textarea small"
+          aria-label="Second legal document text for comparison"
+          placeholder="Paste the second document here..."
+        ></textarea>
+      </div>
+
+      <div id="ask-panel" class="conditional-panel" hidden>
+        <label for="ask-question" class="field-label">Your question</label>
+        <input
+          id="ask-question"
+          type="text"
+          class="text-input"
+          maxlength="500"
+          placeholder="e.g. Can I terminate this early?"
+          aria-label="Question about the document"
+        />
+      </div>
+
+      <div id="simplify-panel" class="conditional-panel" hidden>
+        <label for="simplify-focus" class="field-label">Focus on (optional)</label>
+        <input
+          id="simplify-focus"
+          type="text"
+          class="text-input"
+          maxlength="200"
+          placeholder="e.g. payment terms"
+          aria-label="Optional aspect to focus the simplification on"
+        />
+      </div>
+
+      <p class="eyebrow action-eyebrow">Step 2 — choose an action</p>
+      <div class="action-grid" role="group" aria-label="Choose an action">
+        <button type="button" class="action-btn" data-action="analyze" aria-label="Analyze document for risks, obligations, and clauses">
+          <svg class="icon" aria-hidden="true"><use href="#icon-search"/></svg>
+          <span class="action-btn-text">
+            <span class="action-btn-title">Analyze</span>
+            <span class="action-btn-desc">Risks &amp; clauses</span>
+          </span>
+        </button>
+        <button type="button" class="action-btn" data-action="simplify" aria-label="Simplify document into plain English">
+          <svg class="icon" aria-hidden="true"><use href="#icon-edit"/></svg>
+          <span class="action-btn-text">
+            <span class="action-btn-title">Simplify</span>
+            <span class="action-btn-desc">Plain English</span>
+          </span>
+        </button>
+        <button type="button" class="action-btn" data-action="summarize" aria-label="Summarize document into an executive summary">
+          <svg class="icon" aria-hidden="true"><use href="#icon-clipboard"/></svg>
+          <span class="action-btn-text">
+            <span class="action-btn-title">Summarize</span>
+            <span class="action-btn-desc">Executive summary</span>
+          </span>
+        </button>
+        <button type="button" class="action-btn" data-action="compare" aria-label="Compare this document with a second document">
+          <svg class="icon" aria-hidden="true"><use href="#icon-compare"/></svg>
+          <span class="action-btn-text">
+            <span class="action-btn-title">Compare</span>
+            <span class="action-btn-desc">Two documents</span>
+          </span>
+        </button>
+        <button type="button" class="action-btn" data-action="ask" aria-label="Ask a question about this document">
+          <svg class="icon" aria-hidden="true"><use href="#icon-help"/></svg>
+          <span class="action-btn-text">
+            <span class="action-btn-title">Ask</span>
+            <span class="action-btn-desc">A question</span>
+          </span>
+        </button>
+        <button type="button" class="action-btn" data-action="prepare" aria-label="Prepare questions and a checklist for a lawyer">
+          <svg class="icon" aria-hidden="true"><use href="#icon-briefcase"/></svg>
+          <span class="action-btn-text">
+            <span class="action-btn-title">Prepare</span>
+            <span class="action-btn-desc">For a lawyer</span>
+          </span>
+        </button>
+      </div>
+
+      <section class="history-panel" aria-label="Recently submitted documents">
+        <h2 class="history-title">
+          <svg class="icon" aria-hidden="true"><use href="#icon-clock"/></svg>
+          Recent documents
+        </h2>
+        <ul id="history-list" class="history-list"></ul>
+      </section>
+    </section>
+
+    <section
+      id="results-panel"
+      class="results-panel"
+      role="region"
+      aria-label="Analysis results"
+      aria-live="polite"
+    >
+      <div id="welcome-state" class="welcome-state">
+        <p class="eyebrow">What LexAI does</p>
+        <h2>Understand any legal document in minutes</h2>
+        <p class="welcome-intro">
+          LexAI pairs a deterministic document-analysis engine with Gemini's
+          reasoning to help you read, question, and prepare for legal
+          documents with confidence.
+        </p>
+        <div class="feature-grid">
+          <div class="feature-card">
+            <svg class="icon" aria-hidden="true"><use href="#icon-search"/></svg>
+            <h3>Analyze</h3>
+            <p>Detects clauses, flags risky language, extracts obligations, rights, and key dates.</p>
+          </div>
+          <div class="feature-card">
+            <svg class="icon" aria-hidden="true"><use href="#icon-edit"/></svg>
+            <h3>Simplify</h3>
+            <p>Rewrites dense legal language into plain English you can actually use.</p>
+          </div>
+          <div class="feature-card">
+            <svg class="icon" aria-hidden="true"><use href="#icon-clipboard"/></svg>
+            <h3>Summarize</h3>
+            <p>Produces an executive summary with key points and action items.</p>
+          </div>
+          <div class="feature-card">
+            <svg class="icon" aria-hidden="true"><use href="#icon-compare"/></svg>
+            <h3>Compare</h3>
+            <p>Puts two documents side by side and highlights meaningful differences.</p>
+          </div>
+          <div class="feature-card">
+            <svg class="icon" aria-hidden="true"><use href="#icon-help"/></svg>
+            <h3>Ask a Question</h3>
+            <p>Answers your specific questions using only the document text.</p>
+          </div>
+          <div class="feature-card">
+            <svg class="icon" aria-hidden="true"><use href="#icon-briefcase"/></svg>
+            <h3>Prepare for Lawyer</h3>
+            <p>Builds a checklist and question list for your consultation.</p>
+          </div>
+        </div>
+        <p class="welcome-hint">Paste a document on the left and choose an action to get started.</p>
+      </div>
+
+      <div id="loading-state" class="loading-state" hidden>
+        <div class="spinner" aria-hidden="true"></div>
+        <p>LexAI is analysing your document…</p>
+      </div>
+
+      <div id="error-state" class="error-state" hidden role="alert"></div>
+
+      <div id="results-content" class="results-content" hidden></div>
+    </section>
+  </main>
+
+  <footer class="app-footer">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <svg class="icon" aria-hidden="true"><use href="#icon-scale"/></svg>
+        <span>LexAI</span>
+      </div>
+      <p id="disclaimer-text">
+        <svg class="icon" aria-hidden="true"><use href="#icon-alert"/></svg>
+        LexAI provides legal information and education only — not legal advice.
+        Always consult a qualified solicitor or attorney for advice specific to your situation.
+      </p>
+    </div>
+  </footer>
+
+  <script src="/static/script.js"></script>
+</body>
+</html>

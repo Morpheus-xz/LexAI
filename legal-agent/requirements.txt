@@ -1,0 +1,13 @@
+fastapi
+uvicorn[standard]
+google-genai
+pydantic
+tenacity
+slowapi
+httpx
+python-dotenv
+pytest
+pytest-asyncio
+
+# Optional for Vercel/Render bundle size awareness:
+# google-cloud-firestore  # uncomment for GCP Firestore backend
