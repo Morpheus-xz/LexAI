@@ -37,8 +37,6 @@ load_dotenv()
 
 from fastapi import FastAPI, HTTPException, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse
-from fastapi.staticfiles import StaticFiles
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from slowapi.util import get_remote_address
@@ -83,9 +81,16 @@ app = FastAPI(
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
+# The frontend is deployed separately (Vercel) from this API (Render), so
+# CORS must explicitly allow that origin. Set FRONTEND_ORIGINS to a
+# comma-separated list of allowed origins in production; defaults to "*"
+# for local development convenience only.
+_frontend_origins = os.getenv("FRONTEND_ORIGINS", "*")
+_allow_origins = [o.strip() for o in _frontend_origins.split(",")] if _frontend_origins != "*" else ["*"]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=_allow_origins,
     allow_credentials=False,
     allow_methods=["GET", "POST", "DELETE"],
     allow_headers=["*"],
@@ -376,10 +381,8 @@ async def delete_saved_document(doc_id: str, request: Request) -> dict:
     return {"deleted": True, "id": doc_id}
 
 
-_STATIC = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "static")
-app.mount("/static", StaticFiles(directory=_STATIC), name="static")
-
-
 @app.get("/", include_in_schema=False)
-async def serve_index() -> FileResponse:
-    return FileResponse(os.path.join(_STATIC, "index.html"))
+async def root() -> dict:
+    """API-only service — the frontend is deployed separately. Points
+    callers at /health and /docs instead of serving a UI here."""
+    return {"service": APP_NAME, "version": VERSION, "docs": "/docs", "health": "/health"}

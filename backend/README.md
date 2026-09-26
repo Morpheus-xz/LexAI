@@ -4,16 +4,17 @@
 > simplify, and navigate legal documents — without replacing a qualified
 > legal professional.
 >
-> **Deployment target:** Render (Docker web service). This repository has
-> not yet been deployed to a public URL; see [Deployment](#deployment) for
-> the exact steps to stand it up on Render using the included `Dockerfile`.
+> **This is the backend API only.** The frontend lives in `../frontend`
+> and is deployed separately on Vercel. This service (Render) is API-only
+> — see [Deployment](#deployment) for the exact steps to stand up both
+> halves.
 
 ## How this solves the problem statement
 
 The problem statement identifies six concrete ways to help users with legal
 documents. Every feature in LexAI maps to exactly one of them — this mapping
 is explicit in the FastAPI route tags (`tags=[...]` in `app/main.py`), in
-the UI button labels (`static/index.html`), and in this table:
+the UI button labels (`../frontend/index.html`), and in this table:
 
 | User Need | Feature | Endpoint | UI Section |
 |-----------|---------|----------|------------|
@@ -156,48 +157,85 @@ ENV=test GEMINI_API_KEY=test-key pytest tests/ -v
 
 ## Project structure
 
+This repo is split into two independently deployable halves:
+
 ```
-legal-agent/
-├── app/
-│   ├── main.py                  # FastAPI app, routes, middleware, caching
-│   ├── config.py                # All constants, keyword lists, settings
-│   ├── models.py                # All Pydantic models + shared validators
-│   ├── prompt.py                # All Gemini prompt templates
-│   └── services/
-│       ├── legal_processor.py   # Pure deterministic text analysis
-│       ├── gemini_service.py    # Gemini wrapper (retry, async, JSON)
-│       └── storage/             # Abstract repository + in-memory impl
-├── tests/
-├── static/                      # Vanilla HTML/CSS/JS frontend
-├── requirements.txt
-├── Dockerfile
-├── Makefile
-└── README.md
+AI Legal/
+├── backend/                     # This directory — FastAPI API (Render)
+│   ├── app/
+│   │   ├── main.py               # FastAPI app, routes, middleware, caching
+│   │   ├── config.py             # All constants, keyword lists, settings
+│   │   ├── models.py             # All Pydantic models + shared validators
+│   │   ├── prompt.py             # All Gemini prompt templates
+│   │   └── services/
+│   │       ├── legal_processor.py  # Pure deterministic text analysis
+│   │       ├── gemini_service.py   # Gemini wrapper (retry, async, JSON)
+│   │       └── storage/            # Abstract repository + in-memory impl
+│   ├── tests/
+│   ├── requirements.txt
+│   ├── Dockerfile
+│   ├── Makefile
+│   └── README.md                 # This file
+├── frontend/                     # Vanilla HTML/CSS/JS UI (Vercel)
+│   ├── index.html
+│   ├── script.js
+│   ├── style.css
+│   ├── config.js                 # Sets window.API_BASE_URL to the backend
+│   └── vercel.json
+└── render.yaml                   # Render Blueprint for backend/
 ```
 
 ## Running locally
 
 ```bash
+cd backend
 make install
 export GEMINI_API_KEY=your-real-key   # or omit to use test-key for local smoke testing
 make run
-# App is served at http://localhost:8080
+# API is served at http://localhost:8080
 ```
+
+Then open `frontend/index.html` directly in a browser (or serve it with
+any static server, e.g. `python -m http.server 5500` from `frontend/`).
+`frontend/config.js` already points `localhost`/`127.0.0.1` at
+`http://localhost:8080`, so no edits are needed for local development.
 
 ## Deployment
 
-LexAI ships with a hardened, non-root `Dockerfile` and is designed to be
-deployed as a Render **Web Service**:
+The backend deploys to **Render** and the frontend deploys to **Vercel** as
+two separate services from the same GitHub repo, using each platform's
+per-service "root directory" setting.
+
+### Backend → Render
 
 1. Push this repository to GitHub.
-2. On Render, create a new **Web Service** from the repo, choose the
-   **Docker** runtime (Render will use the included `Dockerfile`
-   automatically).
-3. Set the environment variable `GEMINI_API_KEY` in the Render dashboard.
-4. Render sets `$PORT` automatically; the `Dockerfile` already reads
-   `ENV PORT=8080` and the app binds to it via `uvicorn --port 8080` —
-   if Render assigns a different port, update the `CMD` to use `$PORT`.
-5. Render's health check can point at `GET /health`.
+2. On Render, create a new **Web Service** from the repo. Either:
+   - Use the included `render.yaml` (Render detects it automatically and
+     proposes a Blueprint), or
+   - Configure manually: set **Root Directory** to `backend`, runtime
+     **Docker** (uses the included `Dockerfile`).
+3. Set environment variables in the Render dashboard:
+   - `GEMINI_API_KEY` — required.
+   - `FRONTEND_ORIGINS` — your Vercel URL once known, e.g.
+     `https://lexai.vercel.app` (comma-separate multiple origins). Defaults
+     to `*` if unset.
+4. The Dockerfile listens on port 8080 — leave Render's port setting at
+   8080 (auto-detected from the Dockerfile's `EXPOSE 8080`).
+5. Render's health check is already set to `GET /health` in `render.yaml`.
+6. Once live, note the backend URL, e.g. `https://lexai-backend.onrender.com`.
+
+### Frontend → Vercel
+
+1. On Vercel, **Add New Project** from the same GitHub repo.
+2. Set **Root Directory** to `frontend`. No build command is needed
+   (framework preset: "Other" / static) — Vercel serves the files as-is.
+3. Before or after the first deploy, edit `frontend/config.js` and replace
+   `"https://your-backend.onrender.com"` with your actual Render URL from
+   the step above, then commit and redeploy (Vercel auto-redeploys on
+   push).
+4. Once live, note the frontend URL, e.g. `https://lexai.vercel.app`, and
+   set it as `FRONTEND_ORIGINS` on the Render service (step 3 above), then
+   redeploy the backend so CORS allows it.
 
 ## Important disclaimer
 

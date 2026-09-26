@@ -84,7 +84,7 @@
   }
 
   async function callApi(endpoint, payload) {
-    const resp = await fetch(endpoint, {
+    const resp = await fetch(API_BASE_URL + endpoint, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
@@ -370,7 +370,7 @@
 
   async function loadHistory() {
     try {
-      const resp = await fetch("/documents");
+      const resp = await fetch(API_BASE_URL + "/documents");
       if (!resp.ok) return;
       const docs = await resp.json();
       renderHistory(docs);
@@ -407,7 +407,7 @@
     // .closest() (not a direct classList check) so a click on the icon
     // <svg>/<use> nested inside these buttons still resolves correctly.
     if (event.target.closest(".history-load")) {
-      const resp = await fetch(`/documents/${encodeURIComponent(docId)}`);
+      const resp = await fetch(`${API_BASE_URL}/documents/${encodeURIComponent(docId)}`);
       if (resp.ok) {
         const doc = await resp.json();
         docTextEl.value = doc.text;
@@ -415,7 +415,7 @@
         showPanel(welcomeState);
       }
     } else if (event.target.closest(".history-delete")) {
-      await fetch(`/documents/${encodeURIComponent(docId)}`, { method: "DELETE" });
+      await fetch(`${API_BASE_URL}/documents/${encodeURIComponent(docId)}`, { method: "DELETE" });
       loadHistory();
     }
   });
